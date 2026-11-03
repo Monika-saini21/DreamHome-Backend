@@ -1,6 +1,7 @@
+
 const Property = require("../models/Property");
 
-// Get all properties with filters
+// Get all properties with filters and pagination
 const getProperties = async (req, res) => {
   try {
     const {
@@ -12,6 +13,15 @@ const getProperties = async (req, res) => {
       sort,
     } = req.query;
 
+    // Pagination
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.min(
+      Math.max(parseInt(req.query.limit, 10) || 6, 1),
+      50
+    );
+    const skip = (page - 1) * limit;
+
+    // Filters
     let filter = {};
 
     if (location) {
@@ -43,6 +53,7 @@ const getProperties = async (req, res) => {
       };
     }
 
+    // Sorting
     let sortOption = {};
 
     if (sort === "low") {
@@ -53,13 +64,27 @@ const getProperties = async (req, res) => {
       sortOption.createdAt = -1;
     }
 
-    const properties = await Property.find(filter).sort(sortOption);
+    // Get properties and total count
+    const [properties, total] = await Promise.all([
+      Property.find(filter)
+        .sort(sortOption)
+        .skip(skip)
+        .limit(limit),
+
+      Property.countDocuments(filter),
+    ]);
+
+    const totalPages = Math.ceil(total / limit);
 
     res.status(200).json({
       success: true,
-      total: properties.length,
+      total,
+      page,
+      limit,
+      totalPages,
       properties,
     });
+
   } catch (error) {
     res.status(500).json({
       success: false,
@@ -83,6 +108,7 @@ const getSingleProperty = async (req, res) => {
       success: true,
       property,
     });
+
   } catch (error) {
     res.status(500).json({
       message: error.message,

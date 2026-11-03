@@ -8,6 +8,7 @@ const propertyRoutes = require("./routes/propertyRoutes");
 const favoriteRoutes = require("./routes/favoriteRoutes");
 const inquiryRoutes = require("./routes/inquiryRoutes");
 const contactRoutes = require("./routes/contactRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/inquiries", inquiryRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.get("/", (req, res) => {
   res.send("DreamHome Backend is Running!");
